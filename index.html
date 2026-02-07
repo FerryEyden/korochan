@@ -63,10 +63,12 @@
     const listBody = document.getElementById('list-body');
     const totalPriceEl = document.getElementById('total-price');
 
-    // リストの配列
-    let shoppingList = [];
+    // 1. 起動時にLocalStorageからデータを読み込む
+    let shoppingList = JSON.parse(localStorage.getItem('myShoppingList')) || [];
+    
+    // 最初の表示
+    updateUI();
 
-    // 追加ボタンのクリックイベント
     addBtn.addEventListener('click', () => {
         const name = document.getElementById('item-name').value;
         const price = parseInt(document.getElementById('item-price').value);
@@ -80,11 +82,16 @@
         const item = { id: Date.now(), name, price, qty };
         shoppingList.push(item);
         
-        updateUI();
+        saveAndUI(); // 保存して更新
         clearInputs();
     });
 
-    // 画面の更新
+    // 2. データを保存して画面を更新する関数
+    function saveAndUI() {
+        localStorage.setItem('myShoppingList', JSON.stringify(shoppingList));
+        updateUI();
+    }
+
     function updateUI() {
         listBody.innerHTML = '';
         let total = 0;
@@ -107,13 +114,11 @@
         totalPriceEl.textContent = total.toLocaleString();
     }
 
-    // 削除機能
     window.deleteItem = (id) => {
         shoppingList = shoppingList.filter(item => item.id !== id);
-        updateUI();
+        saveAndUI(); // 削除後も保存
     };
 
-    // 入力欄をリセット
     function clearInputs() {
         document.getElementById('item-name').value = '';
         document.getElementById('item-price').value = '';
