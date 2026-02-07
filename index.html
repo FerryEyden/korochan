@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シンプル買い物リスト</title>
+    <style>
+        :root { --main-color: #4a90e2; --bg-color: #f4f7f6; }
+        body { font-family: sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+        h1 { text-align: center; color: #333; font-size: 1.5rem; }
+        
+        /* 入力エリア */
+        .input-group { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 8px; margin-bottom: 20px; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; width: 100%; box-sizing: border-box; }
+        button#add-btn { background: var(--main-color); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        /* リスト表示エリア */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { border-bottom: 2px solid var(--main-color); padding: 10px; text-align: left; font-size: 0.9rem; }
+        td { padding: 12px 10px; border-bottom: 1px solid #eee; }
+        .item-name { font-weight: bold; }
+        .delete-btn { color: #e74c3c; cursor: pointer; border: none; background: none; font-size: 1.2rem; }
+
+        /* 合計金額エリア */
+        .total-section { margin-top: 20px; text-align: right; font-size: 1.2rem; border-top: 2px solid #333; padding-top: 10px; }
+        #total-price { font-weight: bold; color: var(--main-color); font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>買い物リスト</h1>
+
+    <div class="input-group">
+        <input type="text" id="item-name" placeholder="品目 (例: 牛乳)">
+        <input type="number" id="item-price" placeholder="単価" min="0">
+        <input type="number" id="item-qty" value="1" min="1">
+        <button id="add-btn">追加</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>品目</th>
+                <th>単価</th>
+                <th>個数</th>
+                <th>小計</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="list-body">
+            </tbody>
+    </table>
+
+    <div class="total-section">
+        合計金額: <span id="total-price">0</span> 円
+    </div>
+</div>
+
+<script>
+    const addBtn = document.getElementById('add-btn');
+    const listBody = document.getElementById('list-body');
+    const totalPriceEl = document.getElementById('total-price');
+
+    // リストの配列
+    let shoppingList = [];
+
+    // 追加ボタンのクリックイベント
+    addBtn.addEventListener('click', () => {
+        const name = document.getElementById('item-name').value;
+        const price = parseInt(document.getElementById('item-price').value);
+        const qty = parseInt(document.getElementById('item-qty').value);
+
+        if (!name || isNaN(price)) {
+            alert('品目と単価を入力してください');
+            return;
+        }
+
+        const item = { id: Date.now(), name, price, qty };
+        shoppingList.push(item);
+        
+        updateUI();
+        clearInputs();
+    });
+
+    // 画面の更新
+    function updateUI() {
+        listBody.innerHTML = '';
+        let total = 0;
+
+        shoppingList.forEach(item => {
+            const subtotal = item.price * item.qty;
+            total += subtotal;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="item-name">${item.name}</td>
+                <td>${item.price.toLocaleString()}円</td>
+                <td>${item.qty}</td>
+                <td>${subtotal.toLocaleString()}円</td>
+                <td><button class="delete-btn" onclick="deleteItem(${item.id})">×</button></td>
+            `;
+            listBody.appendChild(tr);
+        });
+
+        totalPriceEl.textContent = total.toLocaleString();
+    }
+
+    // 削除機能
+    window.deleteItem = (id) => {
+        shoppingList = shoppingList.filter(item => item.id !== id);
+        updateUI();
+    };
+
+    // 入力欄をリセット
+    function clearInputs() {
+        document.getElementById('item-name').value = '';
+        document.getElementById('item-price').value = '';
+        document.getElementById('item-qty').value = '1';
+    }
+</script>
+
+</body>
+</html>
